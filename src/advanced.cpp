@@ -72,7 +72,7 @@ void TestSingle() {
  *
  * @note If you want to use this function, you should modify the program a little bit:
  *   - Modify your server so that it supports dealing with multiple maps in a single run;
- *   - Remove the line "exit(0)" in function Exit(0). (Or your program may exit immediately after running a single test).
+ *   - Remove the line "exit(0)" in function ExitGame(). (Or your program may exit immediately after running a single test).
  * The special judger on OJ will be a special version of server.h.
  * We'll do some optimizations to it so that it will be faster.
  */
