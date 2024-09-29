@@ -4,9 +4,9 @@
 #include <sstream>
 #include <string>
 
-#include "include/client.h"
+#include "client.h"
 #include "generator.h"
-#include "include/server.h"
+#include "server.h"
 
 bool batch_mode = false;
 
