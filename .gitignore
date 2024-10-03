@@ -5,3 +5,5 @@ out/
 2395.zip
 Minesweeper-2024.pptx
 tmp.pptx
+.vscode/
+build/

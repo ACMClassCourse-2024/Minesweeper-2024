@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 
 /*
  * You may need to define some global variables for the information of the game map here.
@@ -15,6 +16,15 @@ int columns;      // The count of columns of the game map. You MUST NOT modify i
 int total_mines;  // The count of mines of the game map. You MUST NOT modify its name. You should initialize this
                   // variable in function InitMap. It will be used in the advanced task.
 int game_state;  // The state of the game, 0 for continuing, 1 for winning, -1 for losing. You MUST NOT modify its name.
+
+std::vector<std::vector<int>> game_map;
+
+//stats
+int visit_count = 0;
+int marked_mine_count = 0;
+
+void MarkMine(int r, int c);
+
 
 /**
  * @brief The definition of function InitMap()
@@ -31,6 +41,22 @@ int game_state;  // The state of the game, 0 for continuing, 1 for winning, -1 f
 void InitMap() {
   std::cin >> rows >> columns;
   // TODO (student): Implement me!
+  game_map.resize(rows);
+  for (std::vector<int> &row : game_map) {
+    row.resize(columns);
+  }
+  char c;
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < columns; j++) {
+      std::cin >> c;
+      if (c=='.') {
+        game_map[i][j] = -4;
+      } else {
+        game_map[i][j] = -1; // 有地雷
+        total_mines++;
+      }
+    }
+  }
 }
 
 /**
@@ -65,6 +91,69 @@ void InitMap() {
  */
 void VisitBlock(int r, int c) {
   // TODO (student): Implement me!
+  if (game_map[r][c] == -3 || game_map[r][c] >= 0) {
+    return;
+  }
+  else if (game_map[r][c] == -1) {
+    game_map[r][c] = -2; // 引爆地雷
+    game_state = -1;
+    return;
+  }
+  else if (game_map[r][c] == -4) {
+    int count = 0;
+    if (r > 0 && c > 0) {
+      if (game_map[r-1][c-1] == -1 || game_map[r-1][c-1] == -3) count++;
+    }
+    if (r > 0) {
+      if (game_map[r-1][c] == -1 || game_map[r-1][c] == -3) count++;
+    }
+    if (r > 0 && c < columns-1) {
+      if (game_map[r-1][c+1] == -1 || game_map[r-1][c+1] == -3) count++;
+    }
+    if (c > 0) {
+      if (game_map[r][c-1] == -1 || game_map[r][c-1] == -3) count++;
+    }
+    if (c < columns-1) {
+      if (game_map[r][c+1] == -1 || game_map[r][c+1] == -3) count++;
+    }
+    if (r < rows-1 && c > 0) {
+      if (game_map[r+1][c-1] == -1 || game_map[r+1][c-1] == -3) count++;
+    }
+    if (r < rows-1) {
+      if (game_map[r+1][c] == -1 || game_map[r+1][c] == -3) count++;
+    }
+    if (r < rows-1 && c < columns-1) {
+      if (game_map[r+1][c+1] == -1 || game_map[r+1][c+1] == -3) count++;
+    }
+    game_map[r][c] = count;
+    if (count == 0) {
+      if (r > 0 && c > 0) {
+        VisitBlock(r-1, c-1);
+      }
+      if (r > 0) {
+        VisitBlock(r-1, c);
+      }
+      if (r > 0 && c < columns-1) {
+        VisitBlock(r-1, c+1);
+      }
+      if (c > 0) {
+        VisitBlock(r, c-1);
+      }
+      if (c < columns-1) {
+        VisitBlock(r, c+1);
+      }
+      if (r < rows-1 && c > 0) {
+        VisitBlock(r+1, c-1);
+      }
+      if (r < rows-1) {
+        VisitBlock(r+1, c);
+      }
+      if (r < rows-1 && c < columns-1) {
+        VisitBlock(r+1, c+1);
+      }
+    }
+  }
+  visit_count++;
 }
 
 /**
@@ -102,6 +191,14 @@ void VisitBlock(int r, int c) {
  */
 void MarkMine(int r, int c) {
   // TODO (student): Implement me!
+  if (game_map[r][c] == -1) {
+    game_map[r][c] = -3; // 标记地雷
+    marked_mine_count++;
+  }
+  else if (game_map[r][c] == -4) {
+    game_state = -1;
+    game_map[r][c] = -2; // 标记错误的地雷
+  }
 }
 
 /**
@@ -122,6 +219,60 @@ void MarkMine(int r, int c) {
  */
 void AutoExplore(int r, int c) {
   // TODO (student): Implement me!
+  if (game_map[r][c] <= 0) {
+    return;
+  }
+  int count = 0;
+  if (r > 0 && c > 0) {
+    if (game_map[r-1][c-1] == -3) count++;
+  }
+  if (r > 0) {
+    if (game_map[r-1][c] == -3) count++;
+  }
+  if (r > 0 && c < columns-1) {
+    if (game_map[r-1][c+1] == -3) count++;
+  }
+  if (c > 0) {
+    if (game_map[r][c-1] == -3) count++;
+  }
+  if (c < columns-1) {
+    if (game_map[r][c+1] == -3) count++;
+  }
+  if (r < rows-1 && c > 0) {
+    if (game_map[r+1][c-1] == -3) count++;
+  }
+  if (r < rows-1) {
+    if (game_map[r+1][c] == -3) count++;
+  }
+  if (r < rows-1 && c < columns-1) {
+    if (game_map[r+1][c+1] == -3) count++;
+  }
+  if (count == game_map[r][c]) {
+    if (r > 0 && c > 0) {
+      VisitBlock(r-1, c-1);
+    }
+    if (r > 0) {
+      VisitBlock(r-1, c);
+    }
+    if (r > 0 && c < columns-1) {
+      VisitBlock(r-1, c+1);
+    }
+    if (c > 0) {
+      VisitBlock(r, c-1);
+    }
+    if (c < columns-1) {
+      VisitBlock(r, c+1);
+    }
+    if (r < rows-1 && c > 0) {
+      VisitBlock(r+1, c-1);
+    }
+    if (r < rows-1) {
+      VisitBlock(r+1, c);
+    }
+    if (r < rows-1 && c < columns-1) {
+      VisitBlock(r+1, c+1);
+    }
+  }
 }
 
 /**
@@ -135,6 +286,14 @@ void AutoExplore(int r, int c) {
  */
 void ExitGame() {
   // TODO (student): Implement me!
+  if (game_state==1) {
+    std::cout << "YOU WIN!" << std::endl;
+    std::cout << visit_count << " " << total_mines << std::endl;
+  }
+  else {
+    std::cout << "GAME OVER!" << std::endl;
+    std::cout << visit_count << " " << marked_mine_count << std::endl;
+  }
   exit(0);  // Exit the game immediately
 }
 
@@ -164,6 +323,48 @@ void ExitGame() {
  */
 void PrintMap() {
   // TODO (student): Implement me!
+  int unknown_count = 0;
+  for (int i=0; i<rows; i++) {
+    for (int j=0; j<columns; j++) {
+      if (game_map[i][j] == -4) {
+        unknown_count++;
+      }
+    }
+  }
+  if (unknown_count == 0) {
+    game_state = 1;
+    for (int i=0; i<rows; i++) {
+      for (int j=0; j<columns; j++) {
+        if (game_map[i][j] == -1 || game_map[i][j] == -3) { // 标记的地雷
+          std::cout << "@";
+        }
+        else {
+          std::cout << game_map[i][j];
+        }
+      }
+      std::cout << std::endl;
+    }
+  }
+  else {
+    for (int i=0; i<rows; i++) {
+      for (int j=0; j<columns; j++) {
+        if (game_map[i][j] == -1 || game_map[i][j] == -4) {
+          std::cout << "?";
+        }
+        else if (game_map[i][j] == -2) { // 引爆的地雷
+          std::cout << "X";
+        }
+        else if (game_map[i][j] == -3) { // 标记的地雷
+          std::cout << "@";
+        }
+        else {
+          std::cout << game_map[i][j];
+        }
+      }
+      std::cout << std::endl;
+    }
+  }
+  
 }
 
 #endif
