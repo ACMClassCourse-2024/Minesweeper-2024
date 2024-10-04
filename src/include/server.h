@@ -20,7 +20,6 @@ int game_state;  // The state of the game, 0 for continuing, 1 for winning, -1 f
 std::vector<std::vector<int>> game_map;
 
 //stats
-int visit_count = 0;
 int marked_mine_count = 0;
 
 void MarkMine(int r, int c);
@@ -153,7 +152,6 @@ void VisitBlock(int r, int c) {
       }
     }
   }
-  visit_count++;
 }
 
 /**
@@ -286,6 +284,14 @@ void AutoExplore(int r, int c) {
  */
 void ExitGame() {
   // TODO (student): Implement me!
+  int visit_count = 0;
+  for (int i=0; i<rows; i++) {
+    for (int j=0; j<columns; j++) {
+      if (game_map[i][j] >= 0) {
+        visit_count++;
+      }
+    }
+  }
   if (game_state==1) {
     std::cout << "YOU WIN!" << std::endl;
     std::cout << visit_count << " " << total_mines << std::endl;
@@ -335,7 +341,7 @@ void PrintMap() {
     game_state = 1;
     for (int i=0; i<rows; i++) {
       for (int j=0; j<columns; j++) {
-        if (game_map[i][j] == -1 || game_map[i][j] == -3) { // 标记的地雷
+        if (game_map[i][j] == -1 || game_map[i][j] == -3) {
           std::cout << "@";
         }
         else {
