@@ -42,6 +42,7 @@ struct operation
 
 std::vector <std::vector<int>> cli_game_map;
 std::vector <operation> immediate;
+int remaining_mines;
 
 
 std::vector<std::vector<int>> copy (std::vector<std::vector<int>> &map) {
@@ -50,6 +51,218 @@ std::vector<std::vector<int>> copy (std::vector<std::vector<int>> &map) {
     new_map[r] = map[r];
   }
   return new_map;
+}
+
+bool check(std::vector<std::vector<int>> &map, int r, int c);
+bool check_need(int r, int c);
+
+bool assume (std::vector<std::vector<int>> &map, int r, int c, int type, int rec) {
+  if (rec = 0) return true;
+  map[r][c] = type;
+  if (r > 0 && c > 0) {
+    if (cli_game_map[r-1][c-1] >= 0) {
+      if (!check(map, r-1, c-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (r > 0) {
+    if (cli_game_map[r-1][c] >= 0) {
+      if (!check(map, r-1, c)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (r > 0 && c < columns-1) {
+    if (cli_game_map[r-1][c+1] >= 0) {
+      if (!check(map, r-1, c+1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (c > 0) {
+    if (cli_game_map[r][c-1] >= 0) {
+      if (!check(map, r, c-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (c < columns-1) {
+    if (cli_game_map[r][c+1] >= 0) {
+      if (!check(map, r, c+1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (r < rows-1 && c > 0) {
+    if (cli_game_map[r+1][c-1] >= 0) {
+      if (!check(map, r+1, c-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (r < rows-1) {
+    if (cli_game_map[r+1][c] >= 0) {
+      if (!check(map, r+1, c)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (r < rows-1 && c < columns-1) {
+    if (cli_game_map[r+1][c+1] >= 0) {
+      if (!check(map, r+1, c+1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+
+  if (check_need(r-1, c-1)) {
+    if (!assume(map, r-1, c-1, -3, rec-1)) {
+      if (!assume(map, r-1, c-1, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (check_need(r-1, c)) {
+    if (!assume(map, r-1, c, -3, rec-1)) {
+      if (!assume(map, r-1, c, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (check_need(r-1, c+1)) {
+    if (!assume(map, r-1, c+1, -3, rec-1)) {
+      if (!assume(map, r-1, c+1, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (check_need(r, c-1)) {
+    if (!assume(map, r, c-1, -3, rec-1)) {
+      if (!assume(map, r, c-1, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (check_need(r, c+1)) {
+    if (!assume(map, r, c+1, -3, rec-1)) {
+      if (!assume(map, r, c+1, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (check_need(r+1, c-1)) {
+    if (!assume(map, r+1, c-1, -3, rec-1)) {
+      if (!assume(map, r+1, c-1, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (check_need(r+1, c)) {
+    if (!assume(map, r+1, c, -3, rec-1)) {
+      if (!assume(map, r+1, c, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+  if (check_need(r+1, c+1)) {
+    if (!assume(map, r+1, c+1, -3, rec-1)) {
+      if (!assume(map, r+1, c+1, -1, rec-1)) {
+        map[r][c] = -4;
+        return false;
+      }
+    }
+  }
+
+  map[r][c] = -4;
+  return true;
+}
+
+bool check_need (int r, int c) {
+  if (r < 0 || r >= rows || c < 0 || c >= columns) return false;
+  int count = 0, marked_count = 0;
+  if (r > 0 && c > 0) {
+    if (cli_game_map[r-1][c-1] > 0) count++;
+  }
+  if (r > 0) {
+    if (cli_game_map[r-1][c] > 0) count++;
+  }
+  if (r > 0 && c < columns-1) {
+    if (cli_game_map[r-1][c+1] > 0) count++;
+  }
+  if (c > 0) {
+    if (cli_game_map[r][c-1] > 0) count++;
+  }
+  if (c < columns-1) {
+    if (cli_game_map[r][c+1] > 0) count++;
+  }
+  if (r < rows-1 && c > 0) {
+    if (cli_game_map[r+1][c-1] > 0) count++;
+  }
+  if (r < rows-1) {
+    if (cli_game_map[r+1][c] > 0) count++;
+  }
+  if (r < rows-1 && c < columns-1) {
+    if (cli_game_map[r+1][c+1] > 0) count++;
+  }
+  if (count > 0) {
+    return true;
+  }
+  return false;
+}
+
+bool check (std::vector<std::vector<int>> &map, int r, int c) {
+  int count = 0, marked_count = 0;
+  if (r > 0 && c > 0) {
+    if (map[r-1][c-1] == -3) marked_count++;
+    if (map[r-1][c-1] == -4) count++;
+  }
+  if (r > 0) {
+    if (map[r-1][c] == -3) marked_count++;
+    if (map[r-1][c] == -4) count++;
+  }
+  if (r > 0 && c < columns-1) {
+    if (map[r-1][c+1] == -3) marked_count++;
+    if (map[r-1][c+1] == -4) count++;
+  }
+  if (c > 0) {
+    if (map[r][c-1] == -3) marked_count++;
+    if (map[r][c-1] == -4) count++;
+  }
+  if (c < columns-1) {
+    if (map[r][c+1] == -3) marked_count++;
+    if (map[r][c+1] == -4) count++;
+  }
+  if (r < rows-1 && c > 0) {
+    if (map[r+1][c-1] == -3) marked_count++;
+    if (map[r+1][c-1] == -4) count++;
+  }
+  if (r < rows-1) {
+    if (map[r+1][c] == -3) marked_count++;
+    if (map[r+1][c] == -4) count++;
+  }
+  if (r < rows-1 && c < columns-1) {
+    if (map[r+1][c+1] == -3) marked_count++;
+    if (map[r+1][c+1] == -4) count++;
+  }
+  if (marked_count > cli_game_map[r][c]) return false;
+  if (marked_count + count < cli_game_map[r][c]) return false;
+  return true;
 }
 
 /**
@@ -232,9 +445,24 @@ void Decide() {
       }
     }
   }
-  
-  Execute(visit.top().row, visit.top().column, 0);
-  
+  int size = visit.size();
+  visit_info root;
+  for (int i=0; i<std::min(size, 10); i++) {
+    root = visit.top();
+    visit.pop();
+    auto temp_map = copy(cli_game_map);
+    if (!assume(temp_map, root.row, root.column, -3, 4)) {
+      Execute(root.row, root.column, 0);
+      return;
+    }
+    if (!assume(temp_map, root.row, root.column, -1, 4)) {
+      Execute(root.row, root.column, -1);
+      return;
+    }
+  }
+
+  Execute(root.row, root.column, 0);
+  return;
 }
 
 #endif
