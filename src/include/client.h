@@ -305,8 +305,8 @@ void InitGame() {
   cli_game_map = std::vector<std::vector<int>>(rows, std::vector<int>(columns));
   immediate = std::vector <operation>();
 
-  width = 20;
-  depth = 6;
+  width = 24;
+  depth = 7;
   if (rows==10&&columns==10) {
     time_limit = 5000;
   }
@@ -486,7 +486,23 @@ void Decide() {
   visit_info root;
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-start_time).count();
-  if (duration + 200 < time_limit) {
+  if (1.02 * duration > time_limit) {
+    width = 0;
+  }
+  else if (1.05 * duration > time_limit) {
+    width = 6;
+    depth = 3;
+  }
+  else if (1.4 * duration > time_limit)
+  {
+    width = 16;
+    depth = 6;
+  }
+  else if (duration * 2 > time_limit) {
+    width = 24;
+    depth = 6;
+  }
+
   for
    (int i=0; i<std::min(size, width); i++) {
     root = visit.top();
@@ -513,7 +529,7 @@ void Decide() {
       }
     }
   }
-  }
+  
   if (!visit.empty()) {
     root = visit.top();
     if (remaining_mines > remaining_blocks/2) {
