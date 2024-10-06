@@ -1,7 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-// #pragma GCC optimize(3)
+#pragma GCC optimize(3)
 
 #include <iostream>
 #include <utility>
@@ -43,6 +43,9 @@ struct operation
 std::vector <std::vector<int>> cli_game_map;
 std::vector <operation> immediate;
 int remaining_mines;
+int remaining_blocks;
+int width = 10;
+int depth = 5;
 
 
 std::vector<std::vector<int>> copy (std::vector<std::vector<int>> &map) {
@@ -315,14 +318,18 @@ void InitGame() {
 void ReadMap() {
   // TODO (student): Implement me!
   char b;
+  remaining_mines = total_mines;
+  remaining_blocks = 0;
   for (int r = 0; r < rows; r++) {
     for (int c = 0; c < columns; c++) {
       std::cin >> b;
       if (b == '?') {
         cli_game_map[r][c] = -4;
+        remaining_blocks++;
       }
       else if (b == '@') {
         cli_game_map[r][c] = -3;
+        remaining_mines--;
       }
       else {
         cli_game_map[r][c] = b - '0';
@@ -441,34 +448,64 @@ void Decide() {
       }
 
       if (cli_game_map[r][c] == -4) {
+        if (remaining_mines==0) {
+          Execute(r, c, 0);
+          return;
+        }
         visit.push(visit_info({r, c, count, marked_count}));
       }
     }
   }
   int size = visit.size();
   visit_info root;
-  for (int i=0; i<std::min(size, 4); i++) {
+  for (int i=0; i<std::min(size, width); i++) {
     root = visit.top();
     visit.pop();
     auto temp_map = copy(cli_game_map);
-    if (!assume(temp_map, root.row, root.column, -3, 6)) {
-      Execute(root.row, root.column, 0);
-      return;
+    if (remaining_mines > remaining_blocks/2) {
+      if (!assume(temp_map, root.row, root.column, -1, depth)) {
+        Execute(root.row, root.column, -1);
+        return;
+      }
+      if (!assume(temp_map, root.row, root.column, -3, depth)) {
+        Execute(root.row, root.column, 0);
+        return;
+      }
     }
-    if (!assume(temp_map, root.row, root.column, -1, 6)) {
-      Execute(root.row, root.column, -1);
-      return;
+    else {
+      if (!assume(temp_map, root.row, root.column, -3, depth)) {
+        Execute(root.row, root.column, 0);
+        return;
+      }
+      if (!assume(temp_map, root.row, root.column, -1, depth)) {
+        Execute(root.row, root.column, -1);
+        return;
+      }
     }
   }
 
   if (!visit.empty()) {
     root = visit.top();
-    Execute(root.row, root.column, 0);
+    if (remaining_mines > remaining_blocks/2) {
+      Execute(root.row, root.column, 1);
+      return;
+    }
+    else {
+      Execute(root.row, root.column, 0);
+      return;
+    }
     return;
   }
 
   if (size > 0) {
-    Execute(root.row, root.column, 0);
+    if (remaining_mines > remaining_blocks/2) {
+      Execute(root.row, root.column, 1);
+      return;
+    }
+    else {
+      Execute(root.row, root.column, 0);
+      return;
+    }
     return;
   }
 
