@@ -25,7 +25,7 @@ struct visit_info
 struct op_compare
 {
   bool operator() (visit_info & a, visit_info & b) {
-    return 0.5*a.marked_count-a.unvisited < 0.5*b.marked_count-b.unvisited;
+    return 0.34*a.marked_count-a.unvisited < 0.34*b.marked_count-b.unvisited;
   }
 };
 
@@ -57,7 +57,7 @@ bool check(std::vector<std::vector<int>> &map, int r, int c);
 bool check_need(int r, int c);
 
 bool assume (std::vector<std::vector<int>> &map, int r, int c, int type, int rec) {
-  if (rec = 0) return true;
+  if (rec == 0) return true;
   map[r][c] = type;
   if (r > 0 && c > 0) {
     if (cli_game_map[r-1][c-1] >= 0) {
@@ -447,21 +447,32 @@ void Decide() {
   }
   int size = visit.size();
   visit_info root;
-  for (int i=0; i<std::min(size, 10); i++) {
+  for (int i=0; i<std::min(size, 4); i++) {
     root = visit.top();
     visit.pop();
     auto temp_map = copy(cli_game_map);
-    if (!assume(temp_map, root.row, root.column, -3, 4)) {
+    if (!assume(temp_map, root.row, root.column, -3, 6)) {
       Execute(root.row, root.column, 0);
       return;
     }
-    if (!assume(temp_map, root.row, root.column, -1, 4)) {
+    if (!assume(temp_map, root.row, root.column, -1, 6)) {
       Execute(root.row, root.column, -1);
       return;
     }
   }
 
-  Execute(root.row, root.column, 0);
+  if (!visit.empty()) {
+    root = visit.top();
+    Execute(root.row, root.column, 0);
+    return;
+  }
+
+  if (size > 0) {
+    Execute(root.row, root.column, 0);
+    return;
+  }
+
+  Execute(0, 0, 2);
   return;
 }
 
