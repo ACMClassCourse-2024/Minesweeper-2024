@@ -337,7 +337,7 @@ void PrintMap() {
       }
     }
   }
-  if (unknown_count == 0) {
+  if (unknown_count == 0&&game_state==0) {
     game_state = 1;
     for (int i=0; i<rows; i++) {
       for (int j=0; j<columns; j++) {
